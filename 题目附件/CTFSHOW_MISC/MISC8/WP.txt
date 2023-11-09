@@ -1,0 +1,2 @@
+解压、伪代码、010、搜索...没出来
+换一种思路，打开kali，打开shell，使用binwalk分析，发现zlib与png，使用foremost进行分离可见真flag

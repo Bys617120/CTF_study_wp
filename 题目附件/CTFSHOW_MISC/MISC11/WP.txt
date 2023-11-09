@@ -1,0 +1,1 @@
+拖入010，发现可能存在其他文件，进入kali进行binwalk发现两个zlib文件，则说明此图片有隐藏文件，使用foremost没有解析出内容，使用tweakpng排查发现含有2个IDAT块，删除第一个IDAT块发现flag
