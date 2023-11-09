@@ -1,4 +1,4 @@
-# **WriteUP**
+# **Luo_Bei’s WriteUP**
 
 一个初学CTF的萌新笔记qwq
 
@@ -34,7 +34,7 @@
 
 #### Misc5
 
-#### 十六进制编辑器的搜索功能
+##### 十六进制编辑器的搜索功能
 
 解压压缩包，打开文件，png直接显示noflag，使用010打开，在16进制尾端发现真flag
 
@@ -103,7 +103,7 @@ Tweakpng是一款简单易用的png图像浏览工具，它允许查看和修改
 
 #### Misc14
 
-#### binwalk直接出
+binwalk直接出
 
 #### Misc15
 
@@ -137,7 +137,7 @@ binwalk直接出
 
 #### Misc20
 
-#### 我真想锤烂这个出题人的头
+##### 我真想锤烂这个出题人的头
 
 拖到exif查看器里
 
@@ -178,9 +178,9 @@ ctfshow{e8a221498d5c073b4084eb51b1a1686d}
 
 这道题下载好了之后会看到缩略图里面有一串黄色的东西，但是打开之后又不见了
 
-![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1698377588571-528ab143-9d86-4ade-b8fb-5aad74137e5d.png)（缩略图）
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1698377588571-528ab143-9d86-4ade-b8fb-5aad74137e5d.png)（缩略图)
 
-![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1698377675329-2a02bbcc-323a-4402-bbe1-6f9dda83a55a.png)（本体）
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1698377675329-2a02bbcc-323a-4402-bbe1-6f9dda83a55a.png)（本体)
 
 盲猜那串黄色的东西是flag
 
@@ -485,7 +485,7 @@ with open(filename, 'rb') as f:
 
 那么接下来需要一个新工具
 
-#### **imagemagick**
+##### **imagemagick**
 
 `sudo apt-get install imagemagick`
 
@@ -545,7 +545,7 @@ print(flag)
 
 先来说一下这个png为什么会动
 
-#### Apng
+##### Apng
 
 APNG 是 PNG 格式的一种扩展，可以支持动图。APNG 是普通 png 图片的升级版，它的后缀依然是.png，包含动态的情况下体积会比普通静态 png 打出数倍，可以做到无损的情况展示动态。APNG 是向下兼容的，扩展名也是.png ，不支持 APNG 的解码器会表现为 PNG 的形式，即显示 APNG 的第一帧图片。
 
@@ -553,7 +553,7 @@ APNG 是 PNG 格式的一种扩展，可以支持动图。APNG 是普通 png 图
 
 那么再来介绍一个分解APNG的工具
 
-#### [APNG Disassembler](http://sourceforge.net/projects/apngdis/files/latest/download)
+##### [APNG Disassembler](http://sourceforge.net/projects/apngdis/files/latest/download)
 
 ![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1698992703461-46cd35b2-be87-433b-bc49-10356d45636b.png)
 
