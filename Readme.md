@@ -716,7 +716,47 @@ print(ascii_values)
 
 得到flag
 
-## 
+## CTFSHOW_WEB_WriteUp
+
+### web1
+
+直接看源代码
+
+### web2
+
+禁用js后看源代码（或者直接在chrome的更多菜单里看）
+
+### web3
+
+使用F12中的网络进行抓包，看到.ico文件中包含flag
+
+### web4
+
+根据题目提示可以看出信息泄露在robots.txt中，打开后发现flag指向路径，进行定向即可得到flag
+
+### web5
+
+根据题目提示可以得出突破点在phps源码文件泄露，对index.phps进行定向即可
+
+### web6
+
+根据题目提示flag泄露在www.zip文件中，下载源码后得到flag文件在fl000g.txt文件中，在网站上定向文件即可得到flag
+
+### web7
+
+根据题目提示flag泄露在版本管理中，尝试git泄露方向，直接访问url/.git/index.php即可得到flag
+
+### web8
+
+根据题目提示flag泄露在版本管理中，尝试git泄露方向未能得出flag，再次尝试svn方向得到flag，直接访问url/.svn
+
+#### svn
+
+Apache Subversion 通常被缩写成 SVN，是一个开放源代码的版本控制系统，Subversion 在 2000 年由 CollabNet Inc 开发，现在发展成为 Apache 软件基金会的一个项目，同样是一个丰富的开发者和用户社区的一部分。
+
+SVN相对于的RCS、CVS，采用了分支管理系统，它的设计目标就是取代CVS。互联网上免费的版本控制服务多基于Subversion。
+
+### web9
 
 ## CTFSHOW_Caigou_WriteUp
 
