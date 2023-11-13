@@ -716,47 +716,49 @@ print(ascii_values)
 
 得到flag
 
-## CTFSHOW_WEB_WriteUp
+## CTFSHOW_WEB入门
 
-### web1
+### 信息搜集
+
+#### web1
 
 直接看源代码
 
-### web2
+#### web2
 
 禁用js后看源代码（或者直接在chrome的更多菜单里看）
 
-### web3
+#### web3
 
 使用F12中的网络进行抓包，看到.ico文件中包含flag
 
-### web4
+#### web4
 
 根据题目提示可以看出信息泄露在robots.txt中，打开后发现flag指向路径，进行定向即可得到flag
 
-### web5
+#### web5
 
 根据题目提示可以得出突破点在phps源码文件泄露，对index.phps进行定向即可
 
-### web6
+#### web6
 
 根据题目提示flag泄露在www.zip文件中，下载源码后得到flag文件在fl000g.txt文件中，在网站上定向文件即可得到flag
 
-### web7
+#### web7
 
 根据题目提示flag泄露在版本管理中，尝试git泄露方向，直接访问url/.git/index.php即可得到flag
 
-### web8
+#### web8
 
 根据题目提示flag泄露在版本管理中，尝试git泄露方向未能得出flag，再次尝试svn方向得到flag，直接访问url/.svn
 
-#### svn
+##### svn
 
 Apache Subversion 通常被缩写成 SVN，是一个开放源代码的版本控制系统，Subversion 在 2000 年由 CollabNet Inc 开发，现在发展成为 Apache 软件基金会的一个项目，同样是一个丰富的开发者和用户社区的一部分。
 
 SVN相对于的RCS、CVS，采用了分支管理系统，它的设计目标就是取代CVS。互联网上免费的版本控制服务多基于Subversion。
 
-### web9
+#### web9
 
 vim编辑器强制退出之后会有一个后缀名为swp的缓存文件
 
@@ -764,16 +766,16 @@ vim编辑器强制退出之后会有一个后缀名为swp的缓存文件
 
 url/index.php.swp
 
-### 小总结
+#### 小总结
 
-#### 版本控制问题
+##### 版本控制问题
 
 git
 svn
 hg
 对于此类题目应该比较敏感
 
-#### 对于信息泄露总结
+##### 对于信息泄露总结
 
 网站备份信息泄露
 .zip
@@ -785,7 +787,7 @@ bak
 .txt
 ···
 
-#### 版本控制信息泄露
+##### 版本控制信息泄露
 
 .hg
 .git
@@ -795,11 +797,11 @@ bak
 PHPinfo（PHP探针）
 vim缓存
 
-### web10
+#### web10
 
 对cookie进行分析即可，可以下载chrome插件进行辅助分析
 
-### web11
+#### web11
 
 DNS的txt记录，使用cmd即可进行查询
 
@@ -811,7 +813,7 @@ DNS的txt记录，使用cmd即可进行查询
 
 ![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699597584374-2e657ec8-4857-4196-aa3d-89b4f83ad60b.png)
 
-### web12
+#### web12
 
 进入网站发现是一个模板，因为题目描述是需要进入一个认证界面，所以尝试直接在地址后面填写admin字样（纯蒙的），然后出现登录提示，在网页中查找类似密码的字样，发现页面最后有一串数字很可疑，并且在点到其他链接之后这个数字会变成模板自带的数字（你这修改痕迹很明显嘛（？
 
@@ -823,11 +825,11 @@ Password:页面底端那串数字
 
 顺利得到flag
 
-### web13
+#### web13
 
 根据题目提示可知在网页中的技术文档中存在泄露的信息，于是在网页中查找是否有类似文档的东西，在页尾发现documents字样，点进去之后可以下载一个pdf文件，第二页中含有admin的登陆地址和账号密码
 
-### web14
+#### web14
 
 `有时候源码里面就能不经意间泄露重要(editor)的信息,默认配置害死人`
 
@@ -837,7 +839,7 @@ Password:页面底端那串数字
 
 于是尝试在编辑器中调出文件目录，遂找到插入按钮，点进去之后果然进入到了服务器的目录，对目录进行遍历找到了fl00g.txt，随后在url中直接进行调取即可得到flag
 
-### web15
+#### web15
 
 说实话做到这里我开始有点吃力了
 
@@ -847,13 +849,355 @@ Password:页面底端那串数字
 
 进入网页，检查敏感信息，发现网页尾有一个邮箱，然后别的东西就再找不到了，再次查看提示发现需要将url定向到/admin页面，查看到了忘记密码界面，密保是admin所在的地区，根据qq号查找admin地区在西安，填入之后admin密码就被重置掉了，使用新的密码进行登录即可得到flag
 
-### web16
+#### web16
 
 找探针	url/tz.php
 
+#### web17
+
+题目描述：
+
+`备份的sql文件会泄露敏感信息`
+
+于是对文件进行定向，尝试backup.sql后使用vscode打开即可得到flag
+
+#### web18
+
+题目描述：
+
+`不要着急，休息，休息一会儿，玩101分给你flag`
+
+~~不会真的有人去玩到101分吧~~
+
+看到靶场里有一个flappy bird ，对靶场进行抓包之后得到实现这个程序的js文件，对js文件进行分析可以得到在游戏成功到达101分后会有一串unicode的编码
+
+`\u4f60\u8d62\u4e86\uff0c\u53bb\u5e7a\u5e7a\u96f6\u70b9\u76ae\u7231\u5403\u76ae\u770b\u770b`
+
+对其进行解码
+
+`你赢了，去幺幺零点皮爱吃皮看看`
+
+~~好好好又整这么抽象的活是吧~~
+
+对110.php进行定向即可得到flag
+
+#### web19
+
+题目描述
+
+`密钥什么的，就不要放在前端了`
+
+可以得出密钥会在前端的某个位置，对网站进行源代码查看发现以下可疑代码
+
+```php+HTML
+<script type="text/javascript">
+    function checkForm(){
+        var key = "0000000372619038";
+        var iv = "ilove36dverymuch";
+        var pazzword = $("#pazzword").val();
+        pazzword = encrypt(pazzword,key,iv);
+        $("#pazzword").val(pazzword);
+        $("#loginForm").submit();
+        
+    }
+    function encrypt(data,key,iv) { //key,iv：16位的字符串
+        var key1  = CryptoJS.enc.Latin1.parse(key);
+        var iv1   = CryptoJS.enc.Latin1.parse(iv);
+        return CryptoJS.AES.encrypt(data, key1,{
+            iv : iv1,
+            mode : CryptoJS.mode.CBC,
+            padding : CryptoJS.pad.ZeroPadding
+        }).toString();
+    }
+
+</script>
+    <!--
+    error_reporting(0);
+    $flag="fakeflag"
+    $u = $_POST['username'];
+    $p = $_POST['pazzword'];
+    if(isset($u) && isset($p)){
+        if($u==='admin' && $p ==='a599ac85a73384ee3219fa684296eaa62667238d608efa81837030bd1ce1bf04'){
+            echo $flag;
+        }
+}
+    -->
+</html>
+```
+
+可以得知密码的用户名是admin，但是密码明显被加密过，可以看出是aes加密，使用脚本进行解密
+
+```python
+# 导入加密相关的包
+import base64
+import hashlib
+from Crypto import Random
+from Crypto.Cipher import AES
+
+# 定义密钥和初始向量
+key = "0000000372619038"
+iv = "ilove36dverymuch"
+# 将密钥和初始向量转换为二进制格式
+secret_key = hashlib.sha256(key.encode()).digest()
+iv = iv.encode()
+
+# 创建解密器
+cipher = AES.new(secret_key, AES.MODE_CBC, iv)
+# 获取加密后的密码
+encoded_pazzword = "a599ac85a73384ee3219fa684296eaa62667238d608efa81837030bd1ce1bf04"
+# 对加密后的密码进行解密
+encrypted_pazzword = base64.b64decode(encoded_pazzword)
+decrypted_pazzword = cipher.decrypt(encrypted_pazzword)
+# 将解密后的密码转换为字符串
+original_pazzword = decrypted_pazzword.decode()
+# 输出解密后的密码
+print("Decrypted password: " + original_pazzword)
+
+```
+
+解密后的密码
+
+`i_want_a_36d_girl`
+
+。。。 6
+
+登陆后即可得到flag
+
+#### web20
+
+`mdb文件是早期asp+access构架的数据库文件，文件泄露相当于数据库被脱裤了。`
+
+对靶场的db/db.mdb进行定向后使用txt打开查找关键词即可得到静态flag
+
+`flag{ctfshow_old_database}`
+
+### 爆破
+
+那么说到爆破的话就要祭出我们的老祖宗–`burpsuite`了，接下来的大多数操作都是通过这个工具来进行的
+
+#### web21
+
+题目描述
+
+`爆破什么的，都是基操`
+
+同时给了一个字典，进入靶场之后可以看到认证窗口
+
+使用burp自带浏览器，对url进行访问，随便输入用户名和密码后进行抓包得到以下结果
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699837894980-cbbdd5e9-8041-419e-95db-e513ace3cb6f.png)
+
+发送到intruder中进行选框（这玩意是手动加的！！）
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699838071396-e63b2f5b-78e9-40d8-b228-a42fbb11c6ff.png)
+
+发现密钥使用了base64编码，进行解密后可以发现格式如下：
+
+`user:password`
+
+接下来进行配置payload
+
+先将题目给的字典导入到payload中
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699839030333-2593dda9-e4bf-46d9-b93c-a3f765d0f249.png)
+
+随后对发送报文的格式进行编辑
+
+由于密码使用了base64编码进行加密，所以我们的payload也需要使用base64进行加密，于是需要在payload processing里进行base64的encode，又因为我们已经知道了用户名是admin，所以我们要加一个前缀
+
+`admin:`
+
+因为base64的==可能会影响编解码，所以我们要把下面的payload encoding的URL-encode these characters选项关闭
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699839418394-c0209815-5f47-4561-bfd0-cb4e5fdd40f1.png)
+
+随后开启爆破即可
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699839570054-e7288371-9860-45bb-9ffd-4b11d709ad88.png)
+
+可以看到有一个通的，这个就是密码，进行解密后填入账密即可得到flag
+
+#### web22
+
+子域名爆破
+
+虽然这道题题目炸了但是还是可以学到很多知识的，有关于子域名爆破的笔记已经整理到文件所在目录的markdown里
+
+#### web23
+
+题目描述：
+
+`还爆破？这么多代码，告辞！`
+
+靶场给出了一段php代码
+
+```php+HTML
+<?php
+/*# -*- coding: utf-8 -*-# @Author: h1xa# @Date:   2020-09-03 11:43:51# @Last Modified by:   h1xa# @Last Modified time: 2020-09-03 11:56:11# @email: h1xa@ctfer.com# @link: https://ctfer.com
+*/
+error_reporting(0);
+
+include('flag.php');
+if(isset($_GET['token'])){
+    $token = md5($_GET['token']);
+    if(substr($token, 1,1)===substr($token, 14,1) && substr($token, 14,1) ===substr($token, 17,1)){
+        if((intval(substr($token, 1,1))+intval(substr($token, 14,1))+substr($token, 17,1))/substr($token, 1,1)===intval(substr($token, 31,1))){
+            echo $flag;
+        }
+    }
+}else{
+    highlight_file(__FILE__);
+
+}
+?>
+```
+
+这段代码的目的是通过一系列的条件检查来保护`flag.php`文件中的`$flag`变量。只有当满足所有条件时，才会显示`$flag`。否则，它将显示源代码。
+
+那么我们现在要做的就是穷举token直到token符合题目条件
+
+在原有的脚本上面稍加修改一下
+
+```php+HTML
+<?php
+$token='123';
+while (true){
+    $t=$token;
+    $token=md5($token);
+    if(substr($token, 1,1)===substr($token, 14,1) && substr($token, 14,1) ===substr($token, 17,1)){
+        $divisor = intval(substr($token, 1,1));
+        if($divisor != 0 && (intval(substr($token, 1,1))+intval(substr($token, 14,1))+intval(substr($token, 17,1)))/$divisor===intval(substr($token, 31,1))){
+            echo "over!"."<br>";
+            echo $t;
+            break;
+        }
+    }
+}
+highlight_file(__FILE__);
+?>
+
+```
+
+输出结果：
+
+```html
+over!<br>c3d050f04e1a0b88b561182c9236833f<code><span style="color: #000000">
+<br /></span>
+</span>
+</code>
+```
+
+那串字符就是这道题对应的token，在地址栏里输入url/?token=c3d050f04e1a0b88b561182c9236833f
+
+即可得到flag
+
+#### web24
+
+进入靶场之后可以看到一段代码
+
+```php+HTML
+<?php
+/*# -*- coding: utf-8 -*-# @Author: h1xa# @Date:   2020-09-03 13:26:39# @Last Modified by:   h1xa# @Last Modified time: 2020-09-03 13:53:31# @email: h1xa@ctfer.com# @link: https://ctfer.com*/
+
+error_reporting(0);
+include("flag.php");
+if(isset($_GET['r'])){
+    $r = $_GET['r'];
+    mt_srand(372619038);
+    if(intval($r)===intval(mt_rand())){
+        echo $flag;
+    }
+}else{
+    highlight_file(__FILE__);
+    echo system('cat /proc/version');
+}
+
+?>
+Linux version 5.4.0-163-generic (buildd@lcy02-amd64-067) (gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.2)) #180-Ubuntu SMP Tue Sep 5 13:21:23 UTC 2023 Linux version 5.4.0-163-generic (buildd@lcy02-amd64-067) (gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.2)) #180-Ubuntu SMP Tue Sep 5 13:21:23 UTC 2023
+```
+
+在这个代码中，`flag.php`文件的内容只有在满足特定条件的情况下才会被显示。具体来说，需要提供一个`r`参数，使得其整数值等于一个固定的随机数。这个随机数是通过`mt_rand()`函数生成的，但是由于在生成随机数之前设置了随机数生成器的种子`mt_srand(372619038)`，所以这个随机数是固定的。也就是说，每次运行这段代码时，`mt_rand()`函数都会返回相同的随机数，也就是伪随机数，写一份脚本
+
+```php+HTML
+<?php
+mt_srand(372619038);
+echo intval(mt_rand());
+?>
+```
+
+r=1155388967
+
+url/?r=1155388967即可得到flag
+
+#### web25
+
+进入靶场之后可以看到一段代码
+
+```php+HTML
+<?php
+/# -*- coding: utf-8 -*-# @Author: h1xa# @Date:   2020-09-03 13:56:57# @Last Modified by:   h1xa# @Last Modified time: 2020-09-03 15:47:33# @email: h1xa@ctfer.com# @link: https://ctfer.com*/
+error_reporting(0);
+include("flag.php");
+if(isset($_GET['r'])){
+    $r = $_GET['r'];
+    mt_srand(hexdec(substr(md5($flag), 0,8)));
+    $rand = intval($r)-intval(mt_rand());
+    if((!$rand)){
+        if($_COOKIE['token']==(mt_rand()+mt_rand())){
+            echo $flag;
+        }
+    }else{
+        echo $rand;
+    }
+}else{
+    highlight_file(__FILE__);
+    echo system('cat /proc/version');
+}
+#Linux version 5.4.0-163-generic (buildd@lcy02-amd64-067) (gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.2)) 180-Ubuntu SMP Tue Sep 5 13:21:23 UTC 2023 Linux version 5.4.0-163-generic (buildd@lcy02-amd64-067) (gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.2)) 180-Ubuntu SMP Tue Sep 5 13:21:23 UTC 2023
+```
+
+这段代码的目的是需要找到一个特定的`r`参数和`token`cookie才会显示`$flag`，需要提供一个`r`参数和一个`token`cookie，使得它们满足以下条件：
+
+1. `r`参数的整数值等于一个固定的随机数。这个随机数是通过对`$flag`变量进行MD5哈希，然后取哈希的前8个字符，将其从十六进制转换为十进制，然后种子传递给`mt_srand()`函数，最后通过`mt_rand()`函数生成的。
+2. `token`cookie的值等于两个随机数的和。这两个随机数是通过`mt_rand()`函数生成的。
+
+先对r参数进行测试，输入url/?r=0，可以得到r参数的相反数，随后使用一个新工具–php_mt_seed进行破解
+
+```linux
+$ ./php_mt_seed r=0后得到的数组
+```
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699867949918-682663dc-64e9-49dc-8151-00a54ec4c902.png)
+
+随后开始获取cookie，收个回应报头先
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699868143563-34ef1ed2-d715-4d35-9b97-c3e9ae4a06ae.png)
+
+由于服务器对应php版本是7.3.11，所以我们seed值取2657120068（每一次都不一样），随后使用以下脚本对seed进行解密
+
+```php+HTML
+<?php
+error_reporting(0);
+    mt_srand(2657120068);
+    echo mt_rand();
+    echo "===";
+    echo(mt_rand()+mt_rand());
+?>
+```
+
+输出`594406994===2637184074`
+
+前面是r值，后面是cookie值
+
+对发送请求进行修改
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699868307330-6efba0e7-b9ac-4508-aaa2-9246ce97a10a.png)
+
+随后即可得到flag
 
 
-## CTFSHOW_Caigou_WriteUp
+
+## CTFSHOW_CAIGOU_WriteUp
 
 ### 谜之栅栏
 
